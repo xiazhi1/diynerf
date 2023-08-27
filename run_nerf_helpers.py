@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import numpy
+import numpy as np
 
 # call PE
 def get_embedder(multires,i=0):
@@ -110,4 +110,31 @@ class NeRF(nn.Module):
         else:
             outputs=self.output_linear(h)
 
-    def load_weights_from_keras(self,weights):
+    def load_weights_from_keras(self,weights): # use it to load weights and bias of the MLP
+        assert self.use_viewdirs,"Not implemented if use_viewdirs=False"
+
+        # Load pts_linears
+        for i in range(self.D):
+            idx_pts_linears=2*i
+            self.pts_linears[i].weight.data=torch.from_numpy(np.transpose(weights[idx_pts_linears]))
+            self.pts_linears[i].bias.data=torch.from_numpy(np.transpose(weights[idx_pts_linears+1]))
+
+        # Load feature_linear
+        idx_feature_linear=2*self.D
+        self.feature_linear.weight.data=torch.from_numpy(np.transpose(weights[idx_feature_linear]))
+        self.feature_linear.bias.data=torch.from_numpy(np.transpose(weights[idx_feature_linear+1]))
+
+        # Load views_linears
+        idx_views_linears=2*self.D+2
+        self.view_linears[0].weight.data=torch.from_numpy(np.transpose(weights[idx_views_linears]))
+        self.view_linears[0].bias,data=torch.from_numpy(np.transpose(weights[idx_views_linears+1]))
+
+        # Load rgb_linear
+        idx_rgb_linear=2*self.D+4
+        self.rgb_linear.weight.data=torch.from_numpy(np.transpose(weights[idx_rgb_linear]))
+        self.rgb_linear.bias.data=torch.from_numpy(np.transpose(weights[idx_rgb_linear+1]))
+
+        # Load alpha_linear
+        idx_alpha_linear=2*self.D+6
+        self.alpha_linear.weight.data=torch.from_numpy(np.transpose(weights[idx_alpha_linear]))
+        self.alpha_linear.bias.data=torch.from_numpy(np.transpose(weights[idx_alpha_linear+1]))
