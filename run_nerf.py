@@ -11,7 +11,7 @@ from run_nerf_helpers import *
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 np.random.seed(0)
 DEBUG = False
-
+# it is a test for git
 
 def train ():
 
